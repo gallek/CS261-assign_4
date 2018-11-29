@@ -15,7 +15,6 @@
 #include "pq.h"
 #include "dynarray.h"
 
-#define HEAP_CAP 16
 /*
  * This is the structure that represents a priority queue.  You must define
  * this struct to contain the data needed to implement a priority queue.
@@ -32,7 +31,7 @@ struct pq{
 struct pq* pq_create() {
 	struct pq* p = malloc(sizeof(struct pq));
 	assert(p);
-  	p->dyn=dynarray_create(HEAP_CAP);
+  	p->dyn=dynarray_create();
 	return p;
 }
 
@@ -101,7 +100,7 @@ void pq_insert(struct pq* pq, void* value, int priority) {
 	struct pq_val* temp;
 	while(par>=0){ 
 		par=(elem-1)/2; //how to get the correct parent (where to start)
-		temp=(struct pq_val*)dynarray_get(pq->dyn, par); //the temp gets the parents vals so it acts as the parent
+		temp=dynarray_get(pq->dyn, par); //the temp gets the parents vals so it acts as the parent
 		if(temp->prior > pv->prior){ //percolates the newly added element in order to make sure that every parent has a smaller priority than children 
 			dynarray_set(pq->dyn, par, pv);//at the parent index, set the index with the inserted value
 			dynarray_set(pq->dyn, elem, temp); //set with the parent original information
@@ -129,9 +128,8 @@ void pq_insert(struct pq* pq, void* value, int priority) {
  */
 void* pq_first(struct pq* pq) {
   	assert(pq);
-	assert(dynarray_size(pq->dyn)>0); //makes sure that an error will be thrown if there are no elements in the dynarray
 	struct pq_val* first=NULL; //creates a struct to access the first element
-	first=(struct pq_val*)dynarray_get(pq->dyn, 0); //gets the actual element in the first position 
+	first=dynarray_get(pq->dyn, 0); //gets the actual element in the first position 
 	if(first!=NULL){ //if there is an element
 		return first->val; //return the value
 	}
@@ -155,9 +153,8 @@ void* pq_first(struct pq* pq) {
  */
 int pq_first_priority(struct pq* pq) {
 	assert(pq); //makes sure the struct is not empty
-	assert(dynarray_size(pq->dyn)>0); //makes sure that an error will be thrown if there are no elements in the dynarray
         struct pq_val* first=NULL; //creates a struct to access the first element
-        first=(struct pq_val*)dynarray_get(pq->dyn, 0); //gets the actual element in the first position
+        first=dynarray_get(pq->dyn, 0); //gets the actual element in the first position
         if(first!=NULL){ //if there is an element
 		return first->prior; //return the priority integer
 	}
@@ -182,12 +179,10 @@ int pq_first_priority(struct pq* pq) {
  */
 void* pq_remove_first(struct pq* pq) {
 	assert(pq); //makes sure struct is not empty
-	assert(dynarray_size(pq->dyn)>0);//makes sure that an error will be thrown if there are no elements in the dynarray
 	struct pq_val* first=NULL; //access first element
 	struct pq_val* last = NULL; //access last element
-
-	first=(struct pq_val*)dynarray_get(pq->dyn, 0);//the highest priority element is at the 0 index so this should be what the first element shoudl be set to
-	last=(struct pq_val*)dynarray_get(pq->dyn, -1); //the last element has the lowest priority
+	first=dynarray_get(pq->dyn, 0);//the highest priority element is at the 0 index so this should be what the first element shoudl be set to
+	last=dynarray_get(pq->dyn, -1); //the last element has the lowest priority
 
 	dynarray_set(pq->dyn, 0, last); //replaces the highest priority element
 	dynarray_remove(pq->dyn, -1); //removes tht element from the array after information was already copied over
@@ -216,8 +211,8 @@ void* pq_remove_first(struct pq* pq) {
 				min=left; //if right is bigger than left, the minimum is the left
 		}
 		if((((struct pq_val*)dynarray_get(pq->dyn, elem))->prior)>(((struct pq_val*)dynarray_get(pq->dyn, min))->prior)){ //continues percolation
-			t1=(struct pq_val*)dynarray_get(pq->dyn,min); //temp gets the min information
-			t2=(struct pq_val*)dynarray_get(pq->dyn, elem); //temp 2 gets the element information
+			t1=dynarray_get(pq->dyn,min); //temp gets the min information
+			t2=dynarray_get(pq->dyn, elem); //temp 2 gets the element information
 			dynarray_set(pq->dyn, min, t2);
 			dynarray_set(pq->dyn, elem, t1);
 			elem=min;
@@ -227,7 +222,7 @@ void* pq_remove_first(struct pq* pq) {
 	}
 	if(first!=NULL){
 		void*val=first->val;
-		free(first); //freees memory
+		free(first); //frees memory
 		return val;
 	}
 	else{
